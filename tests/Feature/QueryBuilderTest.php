@@ -54,4 +54,125 @@ class QueryBuilderTest extends TestCase
         $collection = DB::table('categories')->pluck('name')->first();
         Log::info(json_encode($collection));
     }
+
+    public function insertDummy()
+    {
+        DB::table('categories')->insert([
+            'id' => 'GADGET',
+            'name' => 'Smartphone',
+            'desc' => 'Smartphone desc',
+            'created_at' => '2024-06-07 14:00:00' 
+        ]);
+        DB::table('categories')->insert([
+            'id' => 'ATK',
+            'name' => 'Pencil',
+            'desc' => 'Pencil desc',
+            'created_at' => '2024-06-08 14:00:00' 
+        ]);
+        DB::table('categories')->insert([
+            'id' => 'FOOD',
+            'name' => 'Ramen',
+            'created_at' => '2024-06-09 14:00:00' 
+        ]);
+        DB::table('categories')->insert([
+            'id' => 'FASHION',
+            'name' => 'Hat',
+            'created_at' => '2024-06-10 14:00:00' 
+        ]);
+    }
+
+    public function testWhereMethod()
+    {
+        $this->insertDummy();
+
+        // where(column, operator, value)
+        $result = DB::table('categories')
+            ->where('name', '=', 'Smartphone')
+            ->get();
+        Log::info('where(column, operator, value) => ' . json_encode($result));
+        $this->assertCount(1, $result);
+
+        // where([condition1, condition2])
+        $result = DB::table('categories')
+            ->where([
+                ['name', '=', 'Pencil'],
+                ['desc', '=', 'Pencil desc']
+            ])
+            ->get();
+        Log::info('where([condition1, condition2]) => ' . json_encode($result));
+        $this->assertCount(1, $result);
+
+        // where(callback(Builder))
+        $result = DB::table('categories')
+            ->where(function($query) {
+                $query->where('name', '=', 'Ramen');
+            })
+            ->get();
+        Log::info('where(callback(Builder)) => ' . json_encode($result));
+        $this->assertCount(1, $result);
+
+        // orWhere(column, operator, value)
+        $result = DB::table('categories')
+            ->where('name', '=', 'Smartphone')
+            ->orWhere('name', '=', 'Hat')
+            ->get();
+        Log::info('orWhere(column, operator, value) => ' . json_encode($result));
+        $this->assertCount(2, $result);
+
+        // orWhere(callback(Builder))
+        $result = DB::table('categories')
+            ->where('name', '=', 'Ramen')
+            ->orWhere(function($query) {
+                $query->where('name', '=', 'Hat');
+            })
+            ->get();
+        Log::info('orWhere(callback(Builder)) => ' . json_encode($result));
+        $this->assertCount(2, $result);
+
+        // whereNot(callback(Builder))
+        $result = DB::table('categories')
+            ->whereNot(function($query) {
+                $query->where('name', '=', 'Pencil');
+            })
+            ->get();
+        Log::info('whereNot(callback(Builder)) => ' . json_encode($result));
+        $this->assertCount(3, $result);
+    }
+
+    public function testWhereBetween()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')
+            ->whereBetween('created_at', ['2024-06-06 14:00:00', '2024-06-08 14:00:00'])
+            ->get();
+        self::assertCount(2, $collection);
+        $collection->each(function ($item) {
+            Log::info('whereBetween => ' . json_encode($item));
+        });
+    }
+
+    public function testWherenIn()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereIn('id', ['GADGET', 'ATK'])->get();
+        self::assertCount(2, $collection);
+
+        $collection->each(function ($item) {
+            Log::info('whereIn => ' . json_encode($item));
+        });
+    }
+
+    public function testWherenNull()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereNull('desc')->get();
+        self::assertCount(2, $collection);
+
+        $collection->each(function ($item) {
+            Log::info('whereNull => ' . json_encode($item));
+        });
+    }
 }
