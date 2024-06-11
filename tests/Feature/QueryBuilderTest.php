@@ -215,4 +215,48 @@ class QueryBuilderTest extends TestCase
         $collection = DB::table('categories')->whereTime('created_at', '14:00')->get();
         self::assertCount(4, $collection);
     }
+
+    public function testUpdate()
+    {
+        $this->insertDummy();
+
+        DB::table('categories')->where('id', '=', 'FOOD')->update([
+            'name' => 'Bakso'
+        ]);
+
+        $collection = DB::table('categories')->where('name', '=', 'Bakso')->get();
+        self::assertCount(1, $collection);
+    }
+
+    public function testUpsert()
+    {
+        DB::table('categories')->updateOrInsert([
+            'id' => 'VOUCHER'
+        ], [
+            'name' => 'Voucher',
+            'desc' => 'Ticket & Voucher',
+            'created_at' => '2024-06-10 16:10:00'
+        ]);
+
+        $collection = DB::table('categories')->where('id', '=', 'VOUCHER')->get();
+        self::assertCount(1, $collection);
+    }
+
+    public function testIncrement()
+    {
+        DB::table('counters')->where('id', '=', 'sample')->increment('counter', 5);
+
+        $collection = DB::table('counters')->where('id', '=', 'sample')->get();
+        self::assertCount(1, $collection);
+        LOG::info("Query Builder Increment => $collection");
+    }
+
+    public function testDecrement()
+    {
+        DB::table('counters')->where('id', '=', 'sample')->decrement('counter', 3);
+
+        $collection = DB::table('counters')->where('id', '=', 'sample')->get();
+        self::assertCount(1, $collection);
+        LOG::info("Query Builder Increment => $collection");
+    }
 }
