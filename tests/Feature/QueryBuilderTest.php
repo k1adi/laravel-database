@@ -310,4 +310,23 @@ class QueryBuilderTest extends TestCase
         self::assertCount(2, $collection);
         LOG::info('Query Builder Join => ' . json_encode($collection));
     }
+
+    public function testQueryOrdering()
+    {
+        $this->insertProductDummy();
+
+        $collection = DB::table('products')->get();
+        LOG::info("Query Builder Ordering Default => $collection");
+
+        $collection = DB::table('products')->orderBy('price', 'desc')->get();
+        LOG::info("Query Builder Ordering Price Desc => $collection");
+        
+        $collection = DB::table('products')
+            ->orderBy('price', 'desc')
+            ->orderBy('name', 'desc')
+            ->get();
+        LOG::info("Query Builder Ordering price and name => $collection");
+
+        self::assertCount(2, $collection);
+    }
 }
