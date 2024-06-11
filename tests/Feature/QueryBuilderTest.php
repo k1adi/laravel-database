@@ -259,4 +259,22 @@ class QueryBuilderTest extends TestCase
         self::assertCount(1, $collection);
         LOG::info("Query Builder Increment => $collection");
     }
+
+    public function testDelete()
+    {
+        $this->insertDummy();
+
+        DB::table('categories')->where('id', '=', 'FOOD')->delete();
+        $collection = DB::table('categories')->where('id', '=', 'FOOD')->get();
+        self::assertCount(0, $collection);
+    }
+
+    public function testTruncateTable()
+    {
+        $this->insertDummy();
+        self::assertDatabaseCount('categories', 4);
+
+        DB::table('categories')->truncate();
+        self::assertDatabaseCount('categories', 0);
+    }
 }
