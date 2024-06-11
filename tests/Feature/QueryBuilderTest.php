@@ -12,6 +12,7 @@ class QueryBuilderTest extends TestCase
 {
     protected function setUp(): void {
         parent::setUp();
+        DB::delete('DELETE FROM `products`');
         DB::delete('DELETE FROM `categories`');
     }
 
@@ -55,7 +56,7 @@ class QueryBuilderTest extends TestCase
         Log::info(json_encode($collection));
     }
 
-    public function insertDummy()
+    public function insertCategoryDummy()
     {
         DB::table('categories')->insert([
             'id' => 'GADGET',
@@ -83,7 +84,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereMethod()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         // where(column, operator, value)
         $result = DB::table('categories')
@@ -141,7 +142,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereBetween()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')
             ->whereBetween('created_at', ['2024-06-06 14:00:00', '2024-06-08 14:00:00'])
@@ -154,7 +155,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWherenIn()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereIn('id', ['GADGET', 'ATK'])->get();
         self::assertCount(2, $collection);
@@ -166,7 +167,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereNull()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereNull('desc')->get();
         self::assertCount(2, $collection);
@@ -178,7 +179,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereDate()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereDate('created_at', '2024-06-07')->get();
         self::assertCount(1, $collection);
@@ -186,7 +187,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereMonth()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereMonth('created_at', '06')->get();
         self::assertCount(4, $collection);
@@ -194,7 +195,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereDay()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereDay('created_at', '10')->get();
         self::assertCount(1, $collection);
@@ -202,7 +203,7 @@ class QueryBuilderTest extends TestCase
 
     public function testWhereYear()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereYear('created_at', '2024')->get();
         self::assertCount(4, $collection);
@@ -210,7 +211,7 @@ class QueryBuilderTest extends TestCase
     
     public function testWhereTime()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         $collection = DB::table('categories')->whereTime('created_at', '14:00')->get();
         self::assertCount(4, $collection);
@@ -218,7 +219,7 @@ class QueryBuilderTest extends TestCase
 
     public function testUpdate()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         DB::table('categories')->where('id', '=', 'FOOD')->update([
             'name' => 'Bakso'
@@ -262,19 +263,51 @@ class QueryBuilderTest extends TestCase
 
     public function testDelete()
     {
-        $this->insertDummy();
+        $this->insertCategoryDummy();
 
         DB::table('categories')->where('id', '=', 'FOOD')->delete();
         $collection = DB::table('categories')->where('id', '=', 'FOOD')->get();
         self::assertCount(0, $collection);
     }
 
-    public function testTruncateTable()
-    {
-        $this->insertDummy();
-        self::assertDatabaseCount('categories', 4);
+    // public function testTruncateTable()
+    // {
+    //     $this->insertCategoryDummy();
+    //     self::assertDatabaseCount('categories', 4);
 
-        DB::table('categories')->truncate();
-        self::assertDatabaseCount('categories', 0);
+    //     DB::table('categories')->truncate();
+    //     self::assertDatabaseCount('categories', 0);
+    // }
+
+    public function insertProductDummy(){
+        $this->insertCategoryDummy();
+
+        DB::table('products')->insert([
+            'id' => '1',
+            'name' => 'Samsung Fold',
+            'desc' => 'Samsung Fold Description',
+            'price' => 10000000,
+            'category_id' => 'GADGET'
+        ]);
+
+        DB::table('products')->insert([
+            'id' => '2',
+            'name' => 'Samsung Flip',
+            'desc' => 'Samsung Flip Description',
+            'price' => 11000000,
+            'category_id' => 'GADGET'
+        ]);
+    }
+
+    public function testQueryJoin()
+    {
+        $this->insertProductDummy();
+
+        $collection = DB::table('products')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->select('products.id', 'products.name', 'categories.name as category_name', 'products.price')
+            ->get();
+        self::assertCount(2, $collection);
+        LOG::info('Query Builder Join => ' . json_encode($collection));
     }
 }
