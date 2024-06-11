@@ -164,7 +164,7 @@ class QueryBuilderTest extends TestCase
         });
     }
 
-    public function testWherenNull()
+    public function testWhereNull()
     {
         $this->insertDummy();
 
@@ -174,5 +174,45 @@ class QueryBuilderTest extends TestCase
         $collection->each(function ($item) {
             Log::info('whereNull => ' . json_encode($item));
         });
+    }
+
+    public function testWhereDate()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereDate('created_at', '2024-06-07')->get();
+        self::assertCount(1, $collection);
+    }
+
+    public function testWhereMonth()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereMonth('created_at', '06')->get();
+        self::assertCount(4, $collection);
+    }
+
+    public function testWhereDay()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereDay('created_at', '10')->get();
+        self::assertCount(1, $collection);
+    }
+
+    public function testWhereYear()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereYear('created_at', '2024')->get();
+        self::assertCount(4, $collection);
+    }
+    
+    public function testWhereTime()
+    {
+        $this->insertDummy();
+
+        $collection = DB::table('categories')->whereTime('created_at', '14:00')->get();
+        self::assertCount(4, $collection);
     }
 }
