@@ -534,7 +534,7 @@ class QueryBuilderTest extends TestCase
     public function testQueryBuilderIteratePagination()
     {
         $this->insertCategoryDummy();
-        
+
         $page = 1;
         while(true) {
             $paginate = DB::table('categories')->paginate(2, ['*'], 'page', $page);
@@ -545,6 +545,25 @@ class QueryBuilderTest extends TestCase
                 $collection = $paginate->items();
                 self::assertNotNull($collection);
                 Log::info('Iterate Pagination => ' . json_encode($collection));
+            }
+        }
+    }
+
+    public function testQueryBuilderCursorPaginator()
+    {
+        $this->insertCategoryDummy();
+
+        $cursor = 'id';
+        while(true) {
+            $paginate = DB::table('categories')->orderBy('id')->cursorPaginate(2, ['*'], 'cursor', $cursor);
+
+            foreach($paginate->items() as $item) {
+                self::assertNotNull($item);
+                Log::info(json_encode($item));
+            }
+            $cursor = $paginate->nextCursor();
+            if($cursor == null) {
+                break;
             }
         }
     }
