@@ -449,4 +449,69 @@ class QueryBuilderTest extends TestCase
         self::assertEquals(11000000, $collection[0]->max_price);
         Log::info("Raw Agregate => $collection");
     }
+
+    public function insertFoodProduct(){
+        DB::table('products')->insert([
+            'id' => '3',
+            'name' => 'Mie Goreng',
+            'desc' => 'Mie Goreng Description',
+            'price' => 15000,
+            'category_id' => 'FOOD'
+        ]);
+
+        DB::table('products')->insert([
+            'id' => '4',
+            'name' => 'Nasi Goreng',
+            'desc' => 'Nasi Goreng Description',
+            'price' => 15000,
+            'category_id' => 'FOOD'
+        ]);
+    }
+
+    public function testQueryGroupBy()
+    {
+        $this->insertProductDummy();
+        $this->insertFoodProduct();
+
+        $collection = DB::table('products')
+            ->select('category_id', DB::raw('count(*) as total_product'))
+            ->groupBy('category_id')
+            ->orderBy('category_id', 'desc')
+            ->get();
+
+        Log::info("Grouping => $collection");
+        self::assertCount(2, $collection);
+        self::assertEquals('GADGET', $collection[0]->category_id);
+        self::assertEquals('FOOD', $collection[1]->category_id);
+        self::assertEquals(2, $collection[0]->total_product);
+        self::assertEquals(2, $collection[1]->total_product);
+    }
+
+    public function testQueryGroupByHaving()
+    {
+        $this->insertProductDummy();
+        $this->insertFoodProduct();
+
+        $collection = DB::table('products')
+            ->select('category_id', DB::raw('count(*) as total_product'))
+            ->groupBy('category_id')
+            ->orderBy('category_id', 'desc')
+            ->having(DB::raw('count(*)'), '>', 2)
+            ->get();
+
+        Log::info("Grouping => $collection");
+        self::assertCount(0, $collection);
+    }
+
+    public function testQueryBuilderLocking()
+    {
+        $this->insertProductDummy();
+
+        DB::transaction(function () {
+            $collection = DB::table('products')->where('id', '=', '1')
+                ->lockForUpdate()->get();
+            
+            self::assertCount(1, $collection);
+        });
+    }
 }
