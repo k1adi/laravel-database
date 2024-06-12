@@ -392,4 +392,44 @@ class QueryBuilderTest extends TestCase
             LOG::info('Cursor result => ' . json_encode($item));
         });
     }
+
+    public function testQueryCount()
+    {
+        $this->insertProductDummy();
+        
+        $collection = DB::table('products')->count('id');
+        self::assertEquals(2, $collection);
+    }
+    
+    public function testQueryMax()
+    {
+        $this->insertProductDummy();
+        
+        $collection = DB::table('products')->max('price');
+        self::assertEquals(11000000, $collection);
+    }
+    
+    public function testQueryMin()
+    {
+        $this->insertProductDummy();
+        
+        $collection = DB::table('products')->min('price');
+        self::assertEquals(10000000, $collection);
+    }
+    
+    public function testQueryAverage()
+    {
+        $this->insertProductDummy();
+        
+        $collection = DB::table('products')->avg('price');
+        self::assertEquals(10500000, $collection);
+    }
+    
+    public function testQuerySum()
+    {
+        $this->insertProductDummy();
+        
+        $collection = DB::table('products')->sum('price');
+        self::assertEquals(21000000, $collection);
+    }
 }
