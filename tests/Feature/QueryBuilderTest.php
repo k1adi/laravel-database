@@ -346,4 +346,26 @@ class QueryBuilderTest extends TestCase
         self::assertCount(2, $page2);
         LOG::info("Query Paging, page 2 => $page2");
     }
+
+    public function insertManyCategories()
+    {
+        for ($i=0; $i < 150; $i++) { 
+            DB::table('categories')->insert([
+                'id' => "CATEGORY - $i",
+                'name' => "Category Name - $i",
+                'created_at' => now()
+            ]);
+        }
+    }
+
+    public function testQueryChunk()
+    {
+        $this->insertManyCategories();
+
+        DB::table('categories')->orderBy('id')
+            ->chunk(10, function($category) {
+                self::assertNotNull($category);
+                LOG::info("Query Chunk => $category");
+            });
+    }
 }
