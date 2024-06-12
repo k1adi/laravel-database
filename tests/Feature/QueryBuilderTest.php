@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\CounterSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +16,7 @@ class QueryBuilderTest extends TestCase
         parent::setUp();
         DB::delete('DELETE FROM `products`');
         DB::delete('DELETE FROM `categories`');
+        DB::delete('DELETE FROM `counters`');
     }
 
     public function testInsert()
@@ -58,28 +61,7 @@ class QueryBuilderTest extends TestCase
 
     public function insertCategoryDummy()
     {
-        DB::table('categories')->insert([
-            'id' => 'GADGET',
-            'name' => 'Smartphone',
-            'desc' => 'Smartphone desc',
-            'created_at' => '2024-06-07 14:00:00' 
-        ]);
-        DB::table('categories')->insert([
-            'id' => 'ATK',
-            'name' => 'Pencil',
-            'desc' => 'Pencil desc',
-            'created_at' => '2024-06-08 14:00:00' 
-        ]);
-        DB::table('categories')->insert([
-            'id' => 'FOOD',
-            'name' => 'Ramen',
-            'created_at' => '2024-06-09 14:00:00' 
-        ]);
-        DB::table('categories')->insert([
-            'id' => 'FASHION',
-            'name' => 'Hat',
-            'created_at' => '2024-06-10 14:00:00' 
-        ]);
+        $this->seed(CategorySeeder::class);
     }
 
     public function testWhereMethod()
@@ -245,6 +227,8 @@ class QueryBuilderTest extends TestCase
 
     public function testIncrement()
     {
+        $this->seed(CounterSeeder::class);
+
         DB::table('counters')->where('id', '=', 'sample')->increment('counter', 5);
 
         $collection = DB::table('counters')->where('id', '=', 'sample')->get();
