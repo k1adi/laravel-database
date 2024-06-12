@@ -380,4 +380,16 @@ class QueryBuilderTest extends TestCase
             LOG::info('Lazy collection => ' . json_encode($item));
         });
     }
+
+    public function testQueryCursor()
+    {
+        $this->insertManyCategories();
+
+        $collection = DB::table('categories')->orderBy('id')->cursor();
+        self::assertNotNull($collection);
+
+        $collection->each(function ($item) {
+            LOG::info('Cursor result => ' . json_encode($item));
+        });
+    }
 }
