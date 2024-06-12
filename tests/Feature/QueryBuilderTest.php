@@ -270,15 +270,6 @@ class QueryBuilderTest extends TestCase
         self::assertCount(0, $collection);
     }
 
-    // public function testTruncateTable()
-    // {
-    //     $this->insertCategoryDummy();
-    //     self::assertDatabaseCount('categories', 4);
-
-    //     DB::table('categories')->truncate();
-    //     self::assertDatabaseCount('categories', 0);
-    // }
-
     public function insertProductDummy(){
         $this->insertCategoryDummy();
 
@@ -297,6 +288,15 @@ class QueryBuilderTest extends TestCase
             'price' => 11000000,
             'category_id' => 'GADGET'
         ]);
+    }
+
+    public function testTruncateTable()
+    {
+        $this->insertProductDummy();
+        self::assertDatabaseCount('products', 2);
+
+        DB::table('products')->truncate();
+        self::assertDatabaseCount('products', 0);
     }
 
     public function testQueryJoin()
