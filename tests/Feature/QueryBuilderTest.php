@@ -329,4 +329,21 @@ class QueryBuilderTest extends TestCase
 
         self::assertCount(2, $collection);
     }
+
+    public function testQueryPaging()
+    {
+        $this->insertCategoryDummy();
+
+        $page1 = DB::table('categories')
+            ->skip(0)->take(2)->get();
+
+        self::assertCount(2, $page1);
+        LOG::info("Query Paging, page 1 => $page1");
+
+        $page2 = DB::table('categories')
+            ->skip(2)->take(2)->get();
+
+        self::assertCount(2, $page2);
+        LOG::info("Query Paging, page 2 => $page2");
+    }
 }
